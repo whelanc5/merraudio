@@ -45,15 +45,15 @@ public class AudioPlayer {
 		
 		try {
 			inputStream.reset();
-			System.out.println(inputStream);
-			System.out.println(clip.getFramePosition());
+			//System.out.println(inputStream);
+			//System.out.println(clip.getFramePosition());
 			clip.setFramePosition(0);
 			clip.setMicrosecondPosition(0);
 			if(!clip.isOpen())
 			clip.open(inputStream);
-			System.out.println(clip.getFramePosition());
-			//clip.loop(Clip.LOOP_CONTINUOUSLY);
-			clip.start();
+			//System.out.println(clip.getFramePosition());
+			clip.loop(Clip.LOOP_CONTINUOUSLY);
+			//clip.start();
 			setPlaying(true);
 			
 		} catch (Throwable t) {
