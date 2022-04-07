@@ -14,6 +14,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 public class AudioPlayerImpl implements AudioPlayer {
@@ -23,7 +24,7 @@ public class AudioPlayerImpl implements AudioPlayer {
 	private Clip clip;
 	private boolean playing;
 	private String fileName;
-
+	
 	public AudioPlayerImpl() {
 		try {
 			clip = AudioSystem.getClip();
@@ -40,8 +41,14 @@ public class AudioPlayerImpl implements AudioPlayer {
 	}
 
 	public void play() throws Exception {
+		
+		
 		try {
-			inputStream.reset();
+			if(inputStream == null) {
+				File file = new File("C:\\audio\\" +fileName);
+				 inputStream = AudioSystem.getAudioInputStream(file);
+			}
+			
 			if (!clip.isOpen())
 				clip.open(inputStream);
 			clip.loop(Clip.LOOP_CONTINUOUSLY);

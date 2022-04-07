@@ -20,7 +20,8 @@ public class AudioService {
 	@Value("${audio_directory}")
 	private String audioDir;
 
-	List<File> getAudioFiles() {
+	public List<File> getAudioFiles() {
+		System.out.println(audioDir);
 		File file = new File(audioDir);
 		Stream<File> stream = Arrays.stream(file.listFiles());
 		return stream.filter(f -> f.getName().matches(".*[mp3|wav]")).toList();
