@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component("StorageMap")
-public class AudioOutput<K, V> extends HashMap<String, AudioPlayerImpl> {
+public class AudioOutput<K, V> extends HashMap<String, AudioPlayer> {
 
 	/**
 	 * 
