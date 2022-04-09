@@ -22,7 +22,7 @@
 				<div class="col">
 					<select class="fileSelect" th:data-mixerName="${source.mixerInfo.name}">
 						<option value="">N/A </option>
-						<option class="row" th:each="file : ${audioFiles}" th:text="${file.getName()}"
+						<option class="row" th:each="file : ${audioFiles}" th:text="${file.getAbsolutePath()}"
 							th:value="${file.getAbsolutePath()}" th:selected="${file.getAbsolutePath()==source.fileName}"> </option>
 					</select>
 				</div>
