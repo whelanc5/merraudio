@@ -39,10 +39,18 @@ public class AudioService {
 	
 	public List<File> getAudioFiles() {
 		System.out.println(audioDirectory);
+		try {
 		File file = new File(audioDirectory);
 		//Stream<File> stream = Arrays.stream(file.listFiles());
 		//return stream.filter(f -> f.getAbsolutePath().matches(".*[mp3|wav]")).toList();
-		return  Arrays.asList(file.listFiles());
+		
+			return Arrays.asList(file.listFiles());
+			
+		
+		}catch(Exception e) {
+			 return new ArrayList<File>();
+		}
+		
 	}
 
 	public String saveFile(MultipartFile file, String outputName) throws IOException, Exception {
