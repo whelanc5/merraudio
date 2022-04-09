@@ -1,47 +1,100 @@
 <html xmlns:th="https://www.thymeleaf.org">
+<head>
+<script th:src="@{/webjars/jquery/3.0.0/jquery.min.js}"></script>
+<script th:src="@{/webjars/popper.js/1.12.9-1/umd/popper.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.0.0-2/js/bootstrap.min.js}"></script>
+<link th:rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css} "/>
+</head>
 	<body>
-		<div>
-			<table>
-				<tr>
-					<th>Audio Source</th><th>File</th><th>Upload</th>	 <th>Play/Pause</th>		
-				</tr>
-				<tr th:each="source : ${storageMap}">
-					<form method="POST" enctype="multipart/form-data" action="/saveFile">
-					<td><input  readonly th:value="${source.mixerInfo.name}" name="outputName" type="text" /> </td> 
-					<td th:text = ${source.fileName}></td>
-					<td><input type="file" name="file" />
-					<input type="submit" value="Upload" /></td>
-					</form>
-					<td><button class="playButton" th:data-mixerName="${source.mixerInfo.name}" th:data-action="play" > Play</button>
-					<button class="playButton" th:data-mixerName="${source.mixerInfo.name}"  th:data-action="stop"  > Stop</button></td>
-				</tr>
-			</table>
+		<div class="container">
+			<div class="row">
+				Audio Directory:<input type="text" id="audioDirectory" th:value="${audioDirectory}"></input>
+			</div>
+			
+			<div class="row">
+				<div class="col">Audio Source</div>
+				<div class="col">File</div>
+				<div class="col">Play/Pause</div>
+			</div>
+			<div class="row" th:each="source : ${storageMap}">
+		
+				<div class="col" th:text="${source.mixerInfo.name}" th:data-mixerName="${source.mixerInfo.name}"></div>
+				<div class="col">
+					<select class="fileSelect" th:data-mixerName="${source.mixerInfo.name}">
+						<option value="">N/A </option>
+						<option class="row" th:each="file : ${audioFiles}" th:text="${file.getName()}"
+							th:value="${file.getAbsolutePath()}" th:selected="${file.getAbsolutePath()==source.fileName}"> </option>
+					</select>
+				</div>
+				<div class="col"><button class="playButton" th:data-mixerName="${source.mixerInfo.name}" th:data-action="play">
+						Play</button>
+					<button class="playButton" th:data-mixerName="${source.mixerInfo.name}" th:data-action="pause">
+						Pause</button>
+					<button class="playButton" th:data-mixerName="${source.mixerInfo.name}" th:data-action="stop"> Stop</button>
+				</div>
+				</option>
+		
+			</div>
+			
+			
+			
+			<div class="row">
+				<button onclick="saveSongs()"> Save </button>
+			</div>
 		</div>
 	</body>
 </html>
 
 <script>
 
-var elements = document.getElementsByClassName("playButton");
+	var elements = document.getElementsByClassName("playButton");
+	var play = async function () {
+		var attribute = encodeURIComponent(this.getAttribute("data-mixerName"));
+		//alert(attribute);
+		url = "/" + this.getAttribute("data-action")
+		try {
+			const response = await fetch(url + "?outputName=" + attribute, {
+				method: 'get'
+			});
+			response.text().then(text => console.log(text));
+		} catch (err) {
+			console.error(`Error: ${err}`);
+		}
+	};
 
+	for (var i = 0; i < elements.length; i++) {
+		elements[i].addEventListener('click', play, false);
+	}
+	
+	async function saveSongs() {
+		let params = "?";
+		let audioDirectory=encodeURIComponent(document.getElementById("audioDirectory").value);
+		console.log(audioDirectory)
+		params +="audioDirectory=" + audioDirectory;
+		let elements = document.getElementsByClassName("fileSelect");
+		
+		for (var i = 0; i < elements.length; i++) {
+			var outputName = encodeURIComponent(elements[i].getAttribute("data-mixerName"));
+			var file = encodeURIComponent(elements[i].value);
+			
+				params += "&";
+			params += "outputName" + i + "=" + outputName + "&fileName" + i + "=" + file;
+		}
+		try {
+			const response = await fetch("/save" + params, {
+				method: 'get'
+			});
+			console.log('Completed!', response.status);
+			if(response.status==200)
+			 	window.location.href = response.url
+			else
+				response.json().then(text => alert(text.message));
+			
+		} catch (err) {
+			console.error(`Error: ${err}`);
+		}
+	};
 
-var play = async function() {
-    var attribute = encodeURIComponent(this.getAttribute("data-mixerName"));
-    //alert(attribute);
-    url ="/" + this.getAttribute("data-action")
-    try {     
-    const response = await fetch(url + "?outputName=" +  attribute, {
-      method: 'get'
-    });
-    console.log('Completed!', response);
-  } catch(err) {
-    console.error(`Error: ${err}`);
-  }
-};
-
-for (var i = 0; i < elements.length; i++) {
-    elements[i].addEventListener('click', play, false);
-}
 
 
 </script>
