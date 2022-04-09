@@ -2,6 +2,7 @@ package com.merr.audio.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -39,8 +40,9 @@ public class AudioService {
 	public List<File> getAudioFiles() {
 		System.out.println(audioDirectory);
 		File file = new File(audioDirectory);
-		Stream<File> stream = Arrays.stream(file.listFiles());
-		return stream.filter(f -> f.getAbsolutePath().matches(".*[mp3|wav]")).toList();
+		//Stream<File> stream = Arrays.stream(file.listFiles());
+		//return stream.filter(f -> f.getAbsolutePath().matches(".*[mp3|wav]")).toList();
+		return  Arrays.asList(file.listFiles());
 	}
 
 	public String saveFile(MultipartFile file, String outputName) throws IOException, Exception {
