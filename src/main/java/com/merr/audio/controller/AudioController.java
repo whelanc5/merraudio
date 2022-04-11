@@ -30,7 +30,7 @@ public class AudioController {
 
 	@RequestMapping("/")
 	public String home(Model model) throws IOException, LineUnavailableException {
-		model.addAttribute("storageMap", new ArrayList<AudioPlayer>(audioService.getAudioOutputs().values()));
+		model.addAttribute("mixerList", new ArrayList<AudioPlayer>(audioService.getAudioOutputs().values()));
 		model.addAttribute("audioFiles", audioService.getAudioFiles());
 		model.addAttribute("audioDirectory", audioService.getAudioDirectory());
 		return "home";

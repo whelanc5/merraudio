@@ -16,7 +16,7 @@
 				<div class="col">File</div>
 				<div class="col">Play/Pause</div>
 			</div>
-			<div class="row" th:each="source : ${storageMap}">
+			<div class="row" th:each="source : ${mixerList}">
 		
 				<div class="col" th:text="${source.mixerInfo.name}" th:data-mixerName="${source.mixerInfo.name}"></div>
 				<div class="col">
