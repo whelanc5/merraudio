@@ -8,38 +8,88 @@
 	<body>
 		<div class="container">
 			<div class="row">
-				Audio Directory:<input type="text" id="audioDirectory" th:value="${audioDirectory}"></input>
+				Audio Directory:<input type="text" form="audioForm" name="audioDirectory" th:value="${audioDirectory}"></input>
 			</div>
 			
+			
 			<div class="row">
+				<div class="col">ID</div>
+				<div class="col">Audio Source</div>
+				<div class="col">File</div>
+				
+			</div>
+			<div class="row">
+				<div class="col">
+					<input value="-1" name="audioIds" form="audioForm" type ="number"> 
+				</div>
+				
+				<div class="col">
+					<select class="mixerSelect" form="audioForm" name="mixers">
+						<option value="">N/A </option>
+						<option class="row" th:each="mixer : ${mixerList}" th:text="${mixer}"
+							th:value="${mixer}"> </option>
+					</select>
+				</div>
+				
+				<div class="col">
+					<select class="fileSelect" form="audioForm" name="files">
+						<option value="">N/A </option>
+						<option class="row" th:each="file : ${audioFiles}" th:text="${file.getAbsolutePath()}"
+							th:value="${file.getAbsolutePath()}" > </option>
+					</select>
+				</div>
+				
+				
+				
+		
+			</div>
+			
+			<form action="/save" id="audioForm">
+  	<button type="button" onclick="save()"> Save </button>
+</form>
+			
+			
+			<div class="row">
+				<div class="col">ID</div>
 				<div class="col">Audio Source</div>
 				<div class="col">File</div>
 				<div class="col">Play/Pause</div>
 			</div>
-			<div class="row" th:each="source : ${mixerList}">
-		
-				<div class="col" th:text="${source.mixerInfo.name}" th:data-mixerName="${source.mixerInfo.name}"></div>
+			
+			<div class="row" th:each="source : ${audioPlayers}">
 				<div class="col">
-					<select class="fileSelect" th:data-mixerName="${source.mixerInfo.name}">
+					<input th:value="${source.id}" name="audioId" form="audioForm" type ="text">
+				</div>
+				<div class="col">
+					<select class="mixerSelect" form="audioForm" name="mixers" >
+						<option value="">N/A </option>
+						<option class="row" th:each="mixer : ${mixerList}" th:text="${mixer}"
+							th:value="${mixer}" th:selected="${mixer==source.mixerInfo.name}"> </option>
+					</select>
+				</div>
+				<div class="col">
+					<select class="fileSelect" form="audioForm"  name="files">
 						<option value="">N/A </option>
 						<option class="row" th:each="file : ${audioFiles}" th:text="${file.getAbsolutePath()}"
 							th:value="${file.getAbsolutePath()}" th:selected="${file.getAbsolutePath()==source.fileName}"> </option>
 					</select>
 				</div>
-				<div class="col"><button class="playButton" th:data-mixerName="${source.mixerInfo.name}" th:data-action="play">
+				<div class="col"><button class="playButton"  th:data-audioId="${source.id}" th:data-action="play">
 						Play</button>
-					<button class="playButton" th:data-mixerName="${source.mixerInfo.name}" th:data-action="pause">
+					<button class="playButton" th:data-audioId="${source.id}"  th:data-action="pause">
 						Pause</button>
-					<button class="playButton" th:data-mixerName="${source.mixerInfo.name}" th:data-action="stop"> Stop</button>
+					<button class="playButton" th:data-audioId="${source.id}"  th:data-action="stop"> Stop</button>
 				</div>
-				</option>
+				
 		
 			</div>
 			
 			
 			
 			<div class="row">
-				<button onclick="saveSongs()"> Save </button>
+			
+
+				
 			</div>
 		</div>
 	</body>
@@ -49,11 +99,11 @@
 
 	var elements = document.getElementsByClassName("playButton");
 	var play = async function () {
-		var attribute = encodeURIComponent(this.getAttribute("data-mixerName"));
+		var attribute = encodeURIComponent(this.getAttribute("data-audioId"));
 		//alert(attribute);
 		url = "/" + this.getAttribute("data-action")
 		try {
-			const response = await fetch(url + "?outputName=" + attribute, {
+			const response = await fetch(url + "?audioId=" + attribute, {
 				method: 'get'
 			});
 			response.text().then(text => console.log(text));
@@ -66,22 +116,12 @@
 		elements[i].addEventListener('click', play, false);
 	}
 	
-	async function saveSongs() {
-		let params = "?";
-		let audioDirectory=encodeURIComponent(document.getElementById("audioDirectory").value);
-		console.log(audioDirectory)
-		params +="audioDirectory=" + audioDirectory;
-		let elements = document.getElementsByClassName("fileSelect");
-		
-		for (var i = 0; i < elements.length; i++) {
-			var outputName = encodeURIComponent(elements[i].getAttribute("data-mixerName"));
-			var file = encodeURIComponent(elements[i].value);
-			
-				params += "&";
-			params += "outputName" + i + "=" + outputName + "&fileName" + i + "=" + file;
-		}
+	async function save() {
+		let params = new URLSearchParams(new FormData(document.getElementById("audioForm"))).toString()
+		console.log(params);
+				
 		try {
-			const response = await fetch("/save" + params, {
+			const response = await fetch("/save?" + params, {
 				method: 'get'
 			});
 			console.log('Completed!', response.status);

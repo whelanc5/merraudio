@@ -3,80 +3,59 @@ package com.merr.audio.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer.Info;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.merr.audio.bean.AudioOutput;
+import com.merr.audio.DAO.AudioDAO;
 import com.merr.audio.bean.AudioPlayer;
 
 @Service
 public class AudioService {
 
 	@Autowired
-	private String audioDirectory;
+	private AudioDAO audioDAO;
 
-	@Autowired
-	private AudioOutput<String, AudioPlayer> storageMap;
-	
-	
-	public String getAudioDirectory() {
-		return audioDirectory;
+	public List<AudioPlayer> getAudioPlayers() {
+		return audioDAO.getAudioPlayers();
 	}
-	
+
 	public List<File> getAudioFiles() {
-		System.out.println(audioDirectory);
-		try {
-		File file = new File(audioDirectory);
-		//Stream<File> stream = Arrays.stream(file.listFiles());
-		//return stream.filter(f -> f.getAbsolutePath().matches(".*[mp3|wav]")).toList();
-		
-			return Arrays.asList(file.listFiles());
-			
-		
-		}catch(Exception e) {
-			 return new ArrayList<File>();
-		}
-		
+		return audioDAO.getAudioFiles();
+
 	}
 
-	public String saveFile(MultipartFile file, String outputName) throws IOException, Exception {
-		AudioPlayer ap = storageMap.get(outputName);
-		AudioInputStream stream = AudioPlayer.createReusableAudioInputStream(file);
-		ap.setInputStream(stream);
-		ap.setFileName(file.getOriginalFilename());
-		return outputName;
+	public String getAudioDirectory() {
+		return audioDAO.getAudioDirectory();
 	}
-	
+
+	public String saveFile(MultipartFile file, String fileName) throws IOException, Exception {
+		return "";
+	}
+
 	public ResponseEntity<?> setAudioDirectory(String directory) {
 		try {
 			File file = new File(directory);
 			if (file == null || !file.exists() || !file.isDirectory()) {
 				return new ResponseEntity<>("error saving directory", HttpStatus.BAD_REQUEST);
 			}
-			audioDirectory = directory;
+			audioDAO.setAudioDirectory(directory);
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	public ResponseEntity<?> play(String outputName) {
+	public ResponseEntity<?> play(Integer audioId) {
 		try {
-			AudioPlayer ap = storageMap.get(outputName);
+			AudioPlayer ap = audioDAO.getAudioPlayerById(audioId);
 			if (ap.getFileName() == null || ap.getFileName().isEmpty()) {
 				return new ResponseEntity<>("no file declared", HttpStatus.BAD_REQUEST);
 			}
@@ -87,9 +66,9 @@ public class AudioService {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	public ResponseEntity<?> pause(String outputName) {
+	public ResponseEntity<?> pause(Integer audioId) {
 		try {
-			AudioPlayer ap = storageMap.get(outputName);
+			AudioPlayer ap = audioDAO.getAudioPlayerById(audioId);
 			ap.pause();
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.BAD_REQUEST);
@@ -97,10 +76,10 @@ public class AudioService {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	public ResponseEntity<?> stop(String outputName) {
+	public ResponseEntity<?> stop(Integer audioId) {
 
 		try {
-			AudioPlayer ap = storageMap.get(outputName);
+			AudioPlayer ap = audioDAO.getAudioPlayerById(audioId);
 			ap.stop();
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.BAD_REQUEST);
@@ -108,13 +87,30 @@ public class AudioService {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	public ResponseEntity<?> saveSongs(HttpServletRequest request) {
-		
-		
+	public ResponseEntity<?> delete(Integer audioId) {
+
 		try {
-			for (int i = 0; i < storageMap.size(); i++) {
-				AudioPlayer ap = storageMap.get(request.getParameter("outputName" + i));
-				ap.setFileName(request.getParameter("fileName" + i));
+			AudioPlayer ap = audioDAO.getAudioPlayerById(audioId);
+			ap.stop();
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	public ResponseEntity<?> saveAudio(List<Integer> ids, List<String> fileNames, List<String> mixers) {
+
+		try {
+			for (Integer i = 0; i < ids.size(); i++) {
+				Integer audioId = ids.get(i);
+				AudioPlayer ap;
+
+				ap = audioDAO.getAudioPlayerById(audioId);
+				if (ap == null) {
+					ap = new AudioPlayer();
+					ap.setId(audioDAO.createAudioPlayer(fileNames.get(i), mixers.get(i)));
+				}
+				
 			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.BAD_REQUEST);
@@ -123,23 +119,17 @@ public class AudioService {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	public AudioOutput<String, AudioPlayer> getAudioOutputs() throws LineUnavailableException {
-		if (storageMap == null) {
-			this.storageMap = new AudioOutput<String, AudioPlayer>();
-		}
+	public List<String> getAudioOutputs() throws LineUnavailableException {
 
+		List<String> audioOutputs = new ArrayList<String>();
 		for (Info info : AudioSystem.getMixerInfo()) {
 			try {
-				if (storageMap.get(info.getName()) == null) {
-					AudioPlayer ap = new AudioPlayer(info);
-					storageMap.put(info.getName(), ap);
-				}
-
+				audioOutputs.add(info.getName());
 			} catch (Exception e) {
 				System.out.println("not an audio output");
 			}
 		}
-		return storageMap;
+		return audioOutputs;
 	}
 
 }
