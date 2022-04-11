@@ -45,11 +45,12 @@ public class AudioPlayer  {
 		
 		try {
 			
-			File file = new File(fileName);
-			inputStream = AudioSystem.getAudioInputStream(file);
+				File file = new File(fileName);
+				 inputStream = AudioSystem.getAudioInputStream(file);
 			
-			if (!clip.isOpen())
-				clip.open(inputStream);
+			
+			
+			clip.open(inputStream);
 			clip.loop(Clip.LOOP_CONTINUOUSLY);
 			setPlaying(true);
 		} catch (Exception e) {
