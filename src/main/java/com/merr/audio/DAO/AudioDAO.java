@@ -73,4 +73,9 @@ public class AudioDAO {
 		this.audioDirectory = audioDirectory;
 	}
 
+	public void deleteAudioPlayer(Integer audioId) {
+		audioPlayers.removeIf(a -> a.getId().equals(audioId));
+		
+	}
+
 }

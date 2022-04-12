@@ -67,21 +67,31 @@ public class AudioController {
 	public ResponseEntity<?> stop(@RequestParam("audioId") Integer audioId) throws IOException, Exception {
 		return audioService.stop(audioId);
 	}
-
-	@GetMapping("/save")
-	public String save(@RequestParam("audioIds") List<Integer> ids, @RequestParam("files") List<String> fileNames, @RequestParam("mixers") List<String> mixers, @RequestParam("audioDirectory") String audioDirectory, Model model) throws IOException, LineUnavailableException {
-
 	
+	@GetMapping("/delete")
+	@ResponseBody
+	public ResponseEntity<?> delete(@RequestParam("audioId") Integer audioId) throws IOException, Exception {
+		return audioService.delete(audioId);
+	}
 
+
+	@GetMapping("/saveDirectory")
+	public String saveDirectory(@RequestParam("audioDirectory") String audioDirectory, Model model)
+			throws IOException, LineUnavailableException {
 		ResponseEntity<?> response = audioService.setAudioDirectory(audioDirectory);
 		if (response.getStatusCode() != HttpStatus.OK) {
-			System.out.println( response.getBody().toString());
+			System.out.println(response.getBody().toString());
 			throw new ResponseStatusException(response.getStatusCode(), response.getBody().toString());
 		}
-		
-		
-		
-		response = audioService.saveAudio(ids, fileNames, mixers);
+
+		return home(model);
+	}
+
+	@GetMapping("/save")
+	public String save(@RequestParam("audioIds") List<Integer> ids, @RequestParam("files") List<String> fileNames,
+			@RequestParam("mixers") List<String> mixers, Model model) throws IOException, LineUnavailableException {
+
+		ResponseEntity<?> response = audioService.saveAudio(ids, fileNames, mixers);
 		if (response.getStatusCode() != HttpStatus.OK)
 			throw new ResponseStatusException(response.getStatusCode(), response.getBody().toString());
 

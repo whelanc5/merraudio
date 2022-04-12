@@ -91,7 +91,8 @@ public class AudioService {
 
 		try {
 			AudioPlayer ap = audioDAO.getAudioPlayerById(audioId);
-			ap.stop();
+			ap.prepareForDelete();
+			audioDAO.deleteAudioPlayer(audioId);
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.BAD_REQUEST);
 		}

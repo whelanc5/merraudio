@@ -24,7 +24,9 @@ public class AudioPlayer {
 	private boolean playing;
 	private String fileName;
 	private Integer id;
-
+	
+	
+	
 	public AudioPlayer() {
 		try {
 			clip = AudioSystem.getClip();
@@ -61,7 +63,12 @@ public class AudioPlayer {
 		clip.setFramePosition(0);
 		clip.setMicrosecondPosition(0);
 	}
-
+	
+	public void prepareForDelete() {
+		if(clip.isOpen())
+			clip.close();
+	}
+	
 	public void setInputStream(AudioInputStream inputStream) {
 		this.inputStream = inputStream;
 	}
