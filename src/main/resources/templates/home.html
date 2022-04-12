@@ -1,51 +1,78 @@
 <html xmlns:th="https://www.thymeleaf.org">
 
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<script th:src="@{/webjars/jquery/3.0.0/jquery.min.js}"></script>
 	<script th:src="@{/webjars/popper.js/1.12.9-1/umd/popper.min.js}"></script>
 	<script th:src="@{/webjars/bootstrap/4.0.0-2/js/bootstrap.min.js}"></script>
 	<link th:rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css} " />
+	<!-- Override Boostrap CSS -->
+    <link rel="stylesheet"  href="/css/bootstrap-overrides.css" >
+    
+    <script src="https://kit.fontawesome.com/9521f20ee4.js" crossorigin="anonymous"></script>
+	
 </head>
 
 <body>
 	<div class="container">
-		<div class="row">
-			<div class="col">
-				Audio Directory:<input type="text" form="directoryForm" name="audioDirectory"
-					th:value="${audioDirectory}"></input>
+		
+
+		<div class="row p-3 ">
+
+			<h3 class="col-3 blue  center">Audio Output</h3>
+			<h3 class="col-4 blue  center">File</h3>
+			<h3 class="col-3 blue   center" >Action</h3>
+
+		</div>
+		
+
+
+		
+
+		<div class="row border" th:each="source : ${audioPlayers}">
+			<div hidden>
+				<input th:value="${source.id}" name="audioId" form="audioForm" type="text">
+			</div>
+			<div class="col-3  center">
+				<span th:text="${source.mixerInfo.name}"> </span>
+
+			</div>
+			<div class="col-4  center">
+				<span th:text="${source.fileName}"> </span>
+
+			</div>
+			<div class="col-3  center"><button class="clipActionButton btn fa-solid fa-play" th:data-audioId="${source.id}" th:data-action="play">
+					</button>
+				<button class="clipActionButton btn fa-solid fa-pause" th:data-audioId="${source.id}" th:data-action="pause">
+					</button>
+				<button class="clipActionButton btn fa-solid fa-stop" th:data-audioId="${source.id}" th:data-action="stop"></button>
+				<button class="clipActionButton btn  fa-solid fa-close" th:data-audioId="${source.id}" th:data-action="delete">
+					
 			</div>
 
 
-			<div class="col"><button type="button" onclick="saveDirectory()"> Update Directory </button></div>
 		</div>
-
-		<div class="row">
-
-			<div class="col">Audio Source</div>
-			<div class="col">File</div>
-			<div class="col">Add</div>
-
-		</div>
-		<div class="row">
+		
+		<div  class="row border">
 			<div hidden>
 				<input value="-1" name="audioIds" form="audioForm" type="number">
 			</div>
 
-			<div class="col">
+			<div class="col-3  center">
 				<select class="mixerSelect" form="audioForm" name="mixers">
 					<option class="row" th:each="mixer : ${mixerList}" th:text="${mixer}" th:value="${mixer}">
 					</option>
 				</select>
 			</div>
 
-			<div class="col">
+			<div class="col-4  center">
 				<select class="fileSelect" form="audioForm" name="files">
 
 					<option class="row" th:each="file : ${audioFiles}" th:text="${file.getAbsolutePath()}"
 						th:value="${file.getAbsolutePath()}"> </option>
 				</select>
 			</div>
-			<div class="col"><button type="button" onclick="save()"> Add Clip </button></div>
+			<div class="col-3  center" ><button type="button" class="btn fa-solid fa-plus" onclick="save()"> </button></div>
 
 
 
@@ -54,47 +81,18 @@
 			<form id="audioForm"></form>
 			<form id="directoryForm"></form>
 		</div>
+		<div class="row p-3">
+			<div class="col-12  center">
+				<span class="blue label p-2 m-1 center">Directory: </span><input type="text"  class="m-1 p-1" form="directoryForm" name="audioDirectory"
+					th:value="${audioDirectory}"></input>
+					<button type="button" class="btn fa-solid fa-save " onclick="saveDirectory()">  </button>
+			</div>
 
 
-		<div class="row">
-
-			<div class="col">Audio Source</div>
-			<div class="col">File</div>
-			<div class="col">Action</div>
+			
 		</div>
-
-		<div class="row" th:each="source : ${audioPlayers}">
-			<div hidden>
-				<input th:value="${source.id}" name="audioId" form="audioForm" type="text">
-			</div>
-			<div class="col">
-				<span th:text="${source.mixerInfo.name}"> </span>
-
-			</div>
-			<div class="col">
-				<span th:text="${source.fileName}"> </span>
-
-			</div>
-			<div class="col"><button class="clipActionButton" th:data-audioId="${source.id}" th:data-action="play">
-					Play</button>
-				<button class="clipActionButton" th:data-audioId="${source.id}" th:data-action="pause">
-					Pause</button>
-				<button class="clipActionButton" th:data-audioId="${source.id}" th:data-action="stop">
-					Stop</button>
-				<button class="clipActionButton" th:data-audioId="${source.id}" th:data-action="delete">
-					Delete</button>
-			</div>
-
-
-		</div>
-
-
-
-		<div class="row">
-
-
-
-		</div>
+		
+		
 	</div>
 </body>
 
@@ -114,7 +112,7 @@
 			});
 			if (response.status == 200 && action =="delete")
 				window.location.href = "/"
-			else
+			else if(response.status !=200)
 				response.json().then(text => alert(text.message));
 		} catch (err) {
 			console.error(`Error: ${err}`);
