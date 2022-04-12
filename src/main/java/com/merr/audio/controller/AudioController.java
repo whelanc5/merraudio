@@ -1,7 +1,7 @@
 package com.merr.audio.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sound.sampled.LineUnavailableException;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.merr.audio.bean.AudioPlayer;
 import com.merr.audio.service.AudioService;
 
 @Controller
@@ -30,9 +29,11 @@ public class AudioController {
 
 	@RequestMapping("/")
 	public String home(Model model) throws IOException, LineUnavailableException {
-		model.addAttribute("mixerList", new ArrayList<AudioPlayer>(audioService.getAudioOutputs().values()));
+		model.addAttribute("mixerList", audioService.getAudioOutputs());
 		model.addAttribute("audioFiles", audioService.getAudioFiles());
 		model.addAttribute("audioDirectory", audioService.getAudioDirectory());
+		model.addAttribute("audioPlayers", audioService.getAudioPlayers());
+		System.out.println(audioService.getAudioPlayers().size());
 		return "home";
 	}
 
@@ -51,35 +52,46 @@ public class AudioController {
 
 	@GetMapping("/play")
 	@ResponseBody
-	public ResponseEntity<?> play(@RequestParam("outputName") String outputName) {
-		return audioService.play(outputName);
+	public ResponseEntity<?> play(@RequestParam("audioId") Integer audioId) {
+		return audioService.play(audioId);
 	}
 
 	@GetMapping("/pause")
 	@ResponseBody
-	public ResponseEntity<?> pause(@RequestParam("outputName") String outputName) {
-		return audioService.pause(outputName);
+	public ResponseEntity<?> pause(@RequestParam("audioId") Integer audioId) {
+		return audioService.pause(audioId);
 	}
 
 	@GetMapping("/stop")
 	@ResponseBody
-	public ResponseEntity<?> stop(@RequestParam("outputName") String outputName) throws IOException, Exception {
-		return audioService.stop(outputName);
+	public ResponseEntity<?> stop(@RequestParam("audioId") Integer audioId) throws IOException, Exception {
+		return audioService.stop(audioId);
+	}
+	
+	@GetMapping("/delete")
+	@ResponseBody
+	public ResponseEntity<?> delete(@RequestParam("audioId") Integer audioId) throws IOException, Exception {
+		return audioService.delete(audioId);
 	}
 
-	@GetMapping("/save")
-	public String save(HttpServletRequest request, Model model) throws IOException, LineUnavailableException {
 
-		String audioDirectoryTemp = request.getParameter("audioDirectory");
-		System.out.print(audioDirectoryTemp);
-
-		ResponseEntity<?> response = audioService.setAudioDirectory(audioDirectoryTemp);
+	@GetMapping("/saveDirectory")
+	public String saveDirectory(@RequestParam("audioDirectory") String audioDirectory, Model model)
+			throws IOException, LineUnavailableException {
+		ResponseEntity<?> response = audioService.setAudioDirectory(audioDirectory);
 		if (response.getStatusCode() != HttpStatus.OK) {
-			System.out.println( response.getBody().toString());
+			System.out.println(response.getBody().toString());
 			throw new ResponseStatusException(response.getStatusCode(), response.getBody().toString());
 		}
 
-		response = audioService.saveSongs(request);
+		return home(model);
+	}
+
+	@GetMapping("/save")
+	public String save(@RequestParam("audioIds") List<Integer> ids, @RequestParam("files") List<String> fileNames,
+			@RequestParam("mixers") List<String> mixers, Model model) throws IOException, LineUnavailableException {
+
+		ResponseEntity<?> response = audioService.saveAudio(ids, fileNames, mixers);
 		if (response.getStatusCode() != HttpStatus.OK)
 			throw new ResponseStatusException(response.getStatusCode(), response.getBody().toString());
 
