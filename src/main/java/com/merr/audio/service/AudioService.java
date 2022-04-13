@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer.Info;
 
@@ -125,6 +126,7 @@ public class AudioService {
 		List<String> audioOutputs = new ArrayList<String>();
 		for (Info info : AudioSystem.getMixerInfo()) {
 			try {
+				Clip clip = AudioSystem.getClip(info);
 				audioOutputs.add(info.getName());
 			} catch (Exception e) {
 				System.out.println("not an audio output");
