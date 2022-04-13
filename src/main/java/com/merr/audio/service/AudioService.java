@@ -109,8 +109,8 @@ public class AudioService {
 
 				ap = audioDAO.getAudioPlayerById(audioId);
 				if (ap == null) {
-					ap = new AudioPlayer();
-					ap.setId(audioDAO.createAudioPlayer(fileNames.get(i), mixers.get(i)));
+					
+					audioDAO.createAudioPlayer(fileNames.get(i), mixers.get(i));
 				}
 				
 			}
