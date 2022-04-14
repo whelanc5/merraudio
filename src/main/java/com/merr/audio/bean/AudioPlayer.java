@@ -10,8 +10,10 @@ import java.io.InputStream;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.Mixer.Info;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,19 +25,27 @@ public class AudioPlayer {
 	private boolean playing;
 	private String fileName;
 	private Integer id;
-
-	public AudioPlayer() {
-
+	
+	
+	
+	public AudioPlayer(Integer audioId, String fileName, String mixerName) {
+		setId(audioId);
+		setFileName(fileName);
+		for (Info info : AudioSystem.getMixerInfo()) {
+			try {
+				if (info.getName().equals(mixerName)) {
+					setMixerInfo(info);
+					clip = AudioSystem.getClip(mixerInfo);
+				}
+			} catch (Exception e) {
+				System.out.println("not an audio output");
+			}
+		}
 		setPlaying(false);
 	}
 
 	public void play() throws Exception {
-		System.out.println(mixerInfo.getName());
-		if (clip == null) {
 
-			clip = AudioSystem.getClip(mixerInfo);
-
-		}
 		try {
 			File file = new File(fileName);
 			if (inputStream == null)
@@ -61,12 +71,12 @@ public class AudioPlayer {
 		clip.setFramePosition(0);
 		clip.setMicrosecondPosition(0);
 	}
-
+	
 	public void prepareForDelete() {
-		if (clip.isOpen())
+		if(clip.isOpen())
 			clip.close();
 	}
-
+	
 	public void setInputStream(AudioInputStream inputStream) {
 		this.inputStream = inputStream;
 	}
@@ -88,7 +98,7 @@ public class AudioPlayer {
 	}
 
 	public void setMixerInfo(Mixer.Info mixerInfo) {
-
+		
 		this.mixerInfo = mixerInfo;
 	}
 

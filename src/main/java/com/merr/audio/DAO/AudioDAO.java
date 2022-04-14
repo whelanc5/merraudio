@@ -14,7 +14,7 @@ import com.merr.audio.bean.AudioPlayer;
 
 public class AudioDAO {
 
-	private static Integer AUDIO_ID_SEQ =0;
+	private static Integer AUDIO_ID_SEQ = 0;
 	@Autowired
 	private String audioDirectory;
 
@@ -29,24 +29,13 @@ public class AudioDAO {
 		return audioPlayers.stream().filter(a -> a.getId().equals(audioId)).findFirst().orElse(null);
 	}
 
-	public Integer createAudioPlayer(String fileName, String mixerName) {
-		AudioPlayer ap = new AudioPlayer();
-		Integer id = AUDIO_ID_SEQ++;
-		ap.setId(id);
-		ap.setFileName(fileName);
-		for (Info info : AudioSystem.getMixerInfo()) {
-			try {
-				if (info.getName().equals(mixerName)) {
-					ap.setMixerInfo(info);
-				}
-			} catch (Exception e) {
-				System.out.println("not an audio output");
-			}
-		}
-
+	public boolean createAudioPlayer(String fileName, String mixerName) {
+		AudioPlayer ap = new AudioPlayer(AUDIO_ID_SEQ++,fileName, mixerName);
+		
+		
 		audioPlayers.add(ap);
 
-		return id;
+		return true;
 
 	}
 
@@ -75,7 +64,7 @@ public class AudioDAO {
 
 	public void deleteAudioPlayer(Integer audioId) {
 		audioPlayers.removeIf(a -> a.getId().equals(audioId));
-		
+
 	}
 
 }
